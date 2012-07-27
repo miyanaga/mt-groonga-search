@@ -1,0 +1,53 @@
+name: GroongaSearch
+id: GroongaSearch
+key: GroongaSearch
+author_link: http://www.ideamans.com/
+author_name: ideaman's Inc.
+description: <MT_TRANS phrase="Provides fast searching with groonga.">
+version: 0.5
+l10n_class: MT::Plugin::GroongaSearch::L10N
+
+groonga_search:
+    database_drivers:
+        _default: MT::Groonga::Database::Keywords
+
+settings:
+    groonga_search_database_path:
+        default: data/groonga
+        scope: system
+
+system_config_template:
+    code: $GroongaSearch::MT::Plugin::GroongaSearch::App::CMS::system_config
+
+callbacks:
+    init_app: $GroongaSearch::MT::Plugin::GroongaSearch::App::Core::on_init_app
+
+# Preserve for future
+#object_types:
+#    author:
+#        can_resync_groonga_search: int meta
+#
+#permissions:
+#    system.resync_groonga_search:
+#        group: sys_admin
+#        label: Resync Groonga Search
+#        order: 2000
+#        permitted_action:
+#            resync_groonga_search: 1
+
+applications:
+    cms:
+        methods:
+            groonga_search_resync: $GroongaSearch::MT::Plugin::GroongaSearch::App::CMS::resync
+            groonga_search_resync_step: $GroongaSearch::MT::Plugin::GroongaSearch::App::CMS::resync_step
+        menus:
+            tools:goonga_search_resync:
+                label: Resync Groonga Search
+                order: 2000
+                mode: groonga_search_resync
+                view: system
+                system_permission: administer
+                condition: $GroongaSearch::MT::Plugin::GroongaSearch::App::CMS::resync_menu_condition
+    new_search:
+        methods:
+            groonga: $GroongaSearch::MT::Plugin::GroongaSearch::App::Search::groonga_search

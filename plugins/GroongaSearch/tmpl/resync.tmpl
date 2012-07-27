@@ -1,0 +1,171 @@
+<__trans_section component="groongasearch">
+<mt:setvarblock name="page_title"><__trans phrase="Resync Groonga Search"></mt:setvarblock>
+<$mt:setvar name="position_actions_bottom" value="1"$>
+<mt:setvarblock name="html_head" append="1">
+<style type="text/css">
+/* -- Progress Bar */
+.progress-bar {
+    height: 20px;
+    width: 322px;
+    background: url('<mt:StaticWebPath>images/progress-bar.gif') repeat-x 100% 0;
+    border: 1px solid #9CBCCB;
+    padding-bottom: 0px;
+}
+.progress-bar span {
+    display: none;
+}
+.icon-progress {
+    padding-left: 20px;
+    background-image: url('<mt:StaticWebPath>images/indicator-login.gif');
+}
+.progress-bar-indeterminate {
+    background: url('../images/progress-bar-indeterminate.gif') repeat-x 0 0;
+}
+</style>
+<script type="text/javascript">
+/* <![CDATA[ */
+jQuery(function($) {
+    $('#retry-resync').click(function() {
+        location.reload();
+    });
+
+    $('#start-resync').click(function(e) {
+        var threads = 0,
+            errors = 0;
+
+        // Indication
+        var indicate = function($el, status, msg) {
+            $el.parents('.field').find('.field-header label')
+                .removeClass('icon-error icon-success icon-progress')
+                .addClass('icon-left icon-' + status);
+            if ( status == 'error' ) {
+                errors++;
+                if ( msg ) {
+                    $el.parents('.field').find('.msg-error')
+                        .removeClass('hidden')
+                        . find('p').text(msg);
+                }
+            }
+        };
+
+        // Recursive
+        var recurse; recurse = function($el) {
+            // Get URL
+            var src = $el.attr('data-src');
+            threads++;
+
+            // Run a step
+            $.ajax({
+                'type': 'GET',
+                'url': src,
+                'success': function(data) {
+                    // Parse JSON
+                    console.log(data);
+                    if ( 'string' == typeof data )
+                        data = eval('(' + data + ')');
+
+                    if ( data.error ) {
+                        // Error occurred
+                        indicate($el, 'error', data.error);
+                    } else if ( data.result ) {
+                        var progress = 0;
+                        if ( data.result.finished ) {
+                            // Completed
+                            indicate($el, 'success');
+                            progress = 100;
+                        } else {
+                            // Compute progress
+                            var current = parseInt($el.attr('data-current') || 0, 10) + 1;
+                            var steps = parseInt($el.attr('data-steps') || 1, 10);
+                            progress = Math.round(current * 100 / steps);
+
+                            // Update status and call recursively
+                            $el.attr('data-src', data.result.next_src);
+                            $el.attr('data-current', data.result.next_step);
+                            recurse($el);
+                        }
+
+                        // Update progress
+                        $el.css('background-position', ( 100 - progress ) + '% 0');
+                    } else {
+                        // Bad response error
+                        indicate($el, 'error', 'Bad response not includes result: ' + src);
+                    }
+                },
+                'error': function(obj) {
+                    console.log(obj);
+                    indicate($el, 'error', 'HTTP error ' + obj.status + ': ' + src);
+                },
+                'complete': function() {
+                    threads--;
+                    if ( threads == 0 ) {
+                        if ( errors == 0 )
+                            $('#handlers-success').removeClass('hidden');
+                        $('#retry-resync').removeClass('hidden');
+                    }
+                }
+            });
+        };
+
+        $(this).addClass('hidden');
+        $('#handlers .handler').each(function() {
+            $('#resync-maybe-processing').addClass('hidden');
+            $(this).removeClass('hidden');
+            indicate($(this), 'progress');
+            recurse($(this));
+        });
+    });
+});
+/* ]]> */
+</script>
+</mt:setvarblock>
+
+<mt:include name="include/header.tmpl">
+
+<mt:if name="maybe_processing">
+    <mtapp:statusmsg id="resync-maybe-processing" class="error">
+        <__trans phrase="Resync maybe processing by another. Wait a minute and reload until disappeared this warning.">
+        <__trans phrase="But if no one another processes resync or this warning retain for long time, resync forcely.">
+    </mtapp:statusmsg>
+</mt:if>
+<mtapp:statusmsg id="handlers-success" class="success hidden">
+    <__trans phrase="All resynchronizations completed">
+</mtapp:statusmsg>
+
+<fieldset id="handlers">
+    <mt:loop name="handlers">
+        <mt:setvarblock name="handler_error_id"><mt:var name="database">-error</mt:setvarblock>
+        <mt:setvarblock name="hint"><__trans phrase="[_1] object(s)" params="<mt:var name='object_count' _default='0'>"></mt:setvarblock>
+        <mtapp:setting id="$handler" label="$label" show_hint="1" hint="$hint">
+            <div
+                id="<mt:var name='database'>"
+                class="handler progress-bar hidden"
+                data-database="<mt:var name='id'>"
+                data-src="<mt:var name='src'>"
+                data-steps="<mt:var name='steps'>"
+                data-current="0"
+            ></div>
+            <mtapp:statusmsg id="$handler_error_id" class="error hidden"></mtapp:statusmsg>
+        </mtapp:setting>
+    </mt:loop>
+</fieldset>
+
+<mt:setvarblock name="action_buttons">
+    <button
+        id="start-resync"
+        accesskey="s"
+        title="<__trans phrase="Start Resync">"
+        class="action primary-button"
+        ><__trans phrase="Start Resync"></button>
+    <button
+        id="retry-resync"
+        accesskey="r"
+        title="<__trans phrase="Retry Resync">"
+        class="action hidden"
+        ><__trans phrase="Retry Resync"></button>
+</mt:setvarblock>
+
+<mt:include name="include/actions_bar.tmpl" bar_position="bottom" hide_pager="1" settings_bar="1">
+
+<mt:include name="include/footer.tmpl">
+</__trans_section>
