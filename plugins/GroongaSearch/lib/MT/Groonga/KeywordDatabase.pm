@@ -47,7 +47,6 @@ sub command {
     unshift @partials, $command;
 
     my $line = join(' ', @partials);
-    MT::log($line);
     my $result = $self->groonga->console($line);
     if ( $body ) {
         $result = $self->groonga->console($body);
@@ -127,7 +126,6 @@ sub delete {
     my $self = shift;
     my ( $arg ) = @_;
     my $line = join( ' ', 'delete', $self->table, qq{"$arg"} );
-    MT::log($line);
     $self->groonga->console($line);
 }
 

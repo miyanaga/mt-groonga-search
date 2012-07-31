@@ -15,8 +15,6 @@ sub new {
     $self->{__name} = $name;
     $self->{__groonga} = Groonga::Console->new($dbpath);
 
-    MT::log($dbpath);
-
     $self;
 }
 
@@ -57,8 +55,6 @@ sub raw_command {
         unless $command =~ $self->allowed_command;
 
     # Filter and build arguments
-    use Data::Dumper;
-    MT::log(Dumper($args));
     my @partials = map {
         # Format command line
         my $value = $args->{$_};
@@ -79,11 +75,9 @@ sub raw_command {
 
     # Build and send a command line and body
     my $line = join(' ', @partials);
-    MT::log($line);
 
     my $result = $self->groonga->console($line);
 
-    MT::log($body) if $body;
     $result = $self->groonga->console($body) if $body;
 
     $result;
@@ -92,7 +86,6 @@ sub raw_command {
 sub command {
     my $self = shift;
     my $result = $self->raw_command(@_);
-    MT::log($result);
     my $json = eval { decode_json($result); };
     $json;
 }
@@ -106,8 +99,10 @@ sub select {
 sub pivot_select_results {
     my $self = shift;
     my ( $raw_result, $index ) = @_;
+
     $index ||= 0;
     my $tupples = $raw_result->[$index] || [0, [], []];
+    my $total = $tupples->[0]->[0] || 0;
 
     # Headers as name array
     my @headers = map { $_->[0] } @{$tupples->[1]};
@@ -125,7 +120,7 @@ sub pivot_select_results {
         push @results, \%record;
     }
 
-    ( \@headers, \@results );
+    ( \@headers, \@results, $total );
 }
 
 sub load {
@@ -173,10 +168,9 @@ sub delete {
     my $self = shift;
     my $arg = pop;
     my ( $table ) = @_;
-    $table ||= $self->table;
+    $table ||= $self->main_table;
 
     my $line = join( ' ', 'delete', $table, qq{"$arg"} );
-    MT::log($line);
     $self->groonga->console($line);
 }
 

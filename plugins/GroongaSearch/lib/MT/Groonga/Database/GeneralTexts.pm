@@ -11,12 +11,12 @@ sub default_limit { 100 }
 sub query {
     my $self = shift;
     my ( $q, $offset, $limit, $params ) = @_;
-    $offset ||= 0;
-    $limit ||= default_limit;
+    $offset = 0 unless defined $limit;
+    $limit = default_limit unless defined $limit;
 
     $params ||= {};
-    $params->{limit} = $limit;
-    $params->{offset} = $offset;
+    $params->{limit} = int($limit);
+    $params->{offset} = int($offset);
     $params->{output_columns} ||= '_key,_score';
     $params->{match_columns} ||= join(',', map { "text$_*$_" } (1..10) );
     $params->{query} ||= $q;
@@ -33,6 +33,7 @@ sub migrate {
 table_create --name data --flags TABLE_HASH_KEY --key_type ShortText
 table_create --name terms --flags TABLE_PAT_KEY|KEY_NORMALIZE --key_type ShortText --default_tokenizer TokenBigramIgnoreBlankSplitSymbolAlphaDigit
 
+column_create --table data --name blog_id --flags COLUMN_SCALAR --type Int32
 column_create --table data --name text1 --flags COLUMN_VECTOR --type LongText
 column_create --table data --name text2 --flags COLUMN_VECTOR --type LongText
 column_create --table data --name text3 --flags COLUMN_VECTOR --type LongText
