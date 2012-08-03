@@ -19,7 +19,7 @@ sub query {
     $params->{offset} = int($offset);
     $params->{output_columns} ||= '_key,_score';
     $params->{match_columns} ||= join(',', map { "text$_*$_" } (1..10) );
-    $params->{query} ||= $q;
+    $params->{query} ||= qq{"$q"};
     $params->{sortby} ||= '-_score';
 
     my $json = $self->select($params);

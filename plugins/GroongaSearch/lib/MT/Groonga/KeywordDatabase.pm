@@ -37,8 +37,8 @@ sub command {
     # Filter and build arguments
     my @partials = map {
         my $value = $args->{$_};
-        $value =~ s/"/\\"/;
-        $_? qq{--$_ "$value"}: qq{"$value"};
+        $value =~ s/'/\\'/;
+        $_? qq{--$_ '$value'}: qq{'$value'};
     } sort {
         $a cmp $b
     } grep {

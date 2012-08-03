@@ -58,8 +58,8 @@ sub raw_command {
     my @partials = map {
         # Format command line
         my $value = $args->{$_};
-        $value =~ s/"/\\"/;
-        $_? qq{--$_ "$value"}: qq{"$value"};
+        $value =~ s/'/\\'/;
+        $_? qq{--$_ '$value'}: qq{'$value'};
     } sort {
         # Precede '' and table
         return -1 if $a eq '';
@@ -75,7 +75,6 @@ sub raw_command {
 
     # Build and send a command line and body
     my $line = join(' ', @partials);
-
     my $result = $self->groonga->console($line);
 
     $result = $self->groonga->console($body) if $body;
