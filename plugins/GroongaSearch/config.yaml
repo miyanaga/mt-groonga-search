@@ -4,7 +4,7 @@ key: GroongaSearch
 author_link: http://www.ideamans.com/
 author_name: ideaman's Inc.
 description: <MT_TRANS phrase="Provides fast searching with groonga.">
-version: 0.5
+version: 0.51
 l10n_class: MT::Plugin::GroongaSearch::L10N
 
 groonga_search:

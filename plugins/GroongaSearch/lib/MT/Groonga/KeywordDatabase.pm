@@ -101,14 +101,14 @@ sub load {
             my $value = $object->{$key} || next;
             if ( ref $value eq 'ARRAY' ) {
                 $value = [ map {
-                    utf8::is_utf8($_)
+                    Encode::is_utf8($_)
                         ? $_
                         : Encode::decode_utf8($_)
                 } grep {
                     $_ && ref $_ eq ''
                 } @$value ];
             } elsif ( ref $value eq '' ) {
-                $value = Encode::decode_utf8($value) unless utf8::is_utf8($_);
+                $value = Encode::decode_utf8($value) unless Encode::is_utf8($_);
             } else {
                 next;
             }

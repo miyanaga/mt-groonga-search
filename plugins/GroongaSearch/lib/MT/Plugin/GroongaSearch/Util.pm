@@ -108,7 +108,7 @@ sub normalize_text {
     # To lower case: alphabet
     # Han to zen: katakana
     # Katakana to hiragana
-    $text = Encode::decode_utf8($text);
+    $text = Encode::decode_utf8($text) unless Encode::is_utf8($text);
     $text = lc(alnum_z2h($text));
     $text = katakana_h2z($text);
     $text = space_z2h($text) unless $ignore_space;

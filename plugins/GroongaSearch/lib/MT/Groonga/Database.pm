@@ -137,7 +137,7 @@ sub load {
 
                 # In the case of array
                 $value = [ map {
-                    utf8::is_utf8($_)
+                    Encode::is_utf8($_)
                         ? $_
                         : Encode::decode_utf8($_)
                 } grep {
@@ -146,7 +146,7 @@ sub load {
             } elsif ( ref $value eq '' ) {
 
                 # In the case of scalar
-                $value = Encode::decode_utf8($value) unless utf8::is_utf8($_);
+                $value = Encode::decode_utf8($value) unless Encode::is_utf8($_);
             } else {
 
                 # Unsuported
