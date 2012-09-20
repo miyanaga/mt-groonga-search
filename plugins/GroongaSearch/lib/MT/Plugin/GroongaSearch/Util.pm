@@ -113,7 +113,6 @@ sub normalize_text {
     $text = katakana_h2z($text);
     $text = space_z2h($text) unless $ignore_space;
     $text = katakana2hiragana($text) unless $ignore_kana;
-    $text = Encode::encode_utf8($text);
 
     $text;
 }
@@ -133,19 +132,6 @@ sub html_to_text {
 
     $text;
 }
-
-sub debug_dump {
-    use Data::Dumper;
-    my $file = MT->instance->config->GroongaSearchDebugFile || return;
-    my ( $title, $text ) = @_;
-    open FH, ">>$file";
-    binmode FH;
-    print FH $title, "\n";
-    print FH $text, "\n" unless ref $text;
-    print FH Dumper($text), "\n\n\n";
-    close FH;
-}
-
 
 1;
 __END__

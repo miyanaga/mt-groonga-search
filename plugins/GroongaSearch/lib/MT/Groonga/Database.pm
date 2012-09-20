@@ -40,12 +40,6 @@ sub raw_command {
     my $self = shift;
     my ( $command, $args, $body ) = @_;
 
-    {
-        # TODO remove
-        use MT::Plugin::GroongaSearch::Util;
-        MT::Plugin::GroongaSearch::Util::debug_dump('raw_command args', $args);
-    }
-
     # Normalize args
     $args = $args && ref $args eq 'HASH'
         ? $args # Retain
@@ -79,21 +73,9 @@ sub raw_command {
     } keys %$args;
     unshift @partials, $command;
 
-    {
-        # TODO remove
-        use MT::Plugin::GroongaSearch::Util;
-        MT::Plugin::GroongaSearch::Util::debug_dump('raw_command partials', \@partials);
-    }
-
     # Build and send a command line and body
     my $line = join(' ', @partials);
     my $result = $self->groonga->console($line);
-
-    {
-        # TODO remove
-        use MT::Plugin::GroongaSearch::Util;
-        MT::Plugin::GroongaSearch::Util::debug_dump('line executed', $line);
-    }
 
     $result = $self->groonga->console($body) if $body;
 
