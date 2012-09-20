@@ -134,6 +134,18 @@ sub html_to_text {
     $text;
 }
 
+sub debug_dump {
+    use Data::Dumper;
+    my $file = MT->instance->config->GroongaSearchDebugFile || return;
+    my ( $title, $text ) = @_;
+    open FH, ">>$file";
+    binmode FH;
+    print FH $title, "\n";
+    print FH $text, "\n" unless ref $text;
+    print FH Dumper($text), "\n\n\n";
+    close FH;
+}
+
 
 1;
 __END__
